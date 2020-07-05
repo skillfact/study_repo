@@ -26,14 +26,13 @@ def game_core_v3(number):
     
     while number != predict_high and number != predict_low:
         count+=1
-        if number > predict_high: 
-            # искомое число за пределами интервала, заменим интервал
+        if number not in range(predict_low,predict_high+1): 
+            # сдвинем интервал 
             tmp = predict_low
             predict_low = predict_high
             predict_high += predict_high - tmp
-        elif number < predict_high and number > predict_low: 
-            # если число в интервале, уменьшим интервал в 2 раза
-            predict_high -= int((predict_high - predict_low)/2)
+        # сократим интервал поиска
+        predict_high -= int((predict_high - predict_low)/2)
     
     return(count) # выход из цикла, если угадали
 
