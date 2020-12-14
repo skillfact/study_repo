@@ -1,0 +1,81 @@
+# Импортируем необходимые библиотеки:
+from sklearn.ensemble import RandomForestRegressor # инструмент для создания и обучения модели
+from sklearn import metrics # инструменты для оценки точности модели
+start_time = datetime.now()
+# Создаём модель
+# regr = RandomForestRegressor(n_estimators=100)
+regr = RandomForestRegressor(n_estimators=100, verbose=1, n_jobs=-1, random_state=RANDOM_SEED)
+# Обучаем модель на тестовом наборе данных
+regr.fit(X_train, y_train)
+
+# Используем обученную модель для предсказания рейтинга ресторанов в тестовой выборке.
+# Предсказанные значения записываем в переменную y_pred
+y_pred = regr.predict(X_test)
+
+#Функция округления.. вторая показала себя чуть лучше :-)
+def round_d(rec):
+    if rec <0.25:
+        return 0
+    elif 0.25<=rec<0.75:
+        return 0.5
+    elif 0.75<=rec<1.25:
+        return 1
+    elif 1.25<=rec<1.75:
+        return 1.5
+    elif 1.75<=rec<2.25:
+        return 2
+    elif 2.25<=rec<2.75:
+        return 2.5
+    elif 2.75<=rec<3.25:
+        return 3
+    elif 3.25<=rec<3.75:
+        return 3.5
+    elif 3.75<=rec<4.25:
+        return 4
+    elif 4.25<=rec<4.75:
+        return 4.5
+    else:
+        return 5
+    
+def round_d2(rec):
+    if rec <0.25:
+        return 0
+    elif 0.25<rec<=0.75:
+        return 0.5
+    elif 0.75<rec<=1.25:
+        return 1
+    elif 1.25<rec<=1.75:
+        return 1.5
+    elif 1.75<rec<=2.25:
+        return 2
+    elif 2.25<rec<=2.75:
+        return 2.5
+    elif 2.75<rec<=3.25:
+        return 3
+    elif 3.25<rec<=3.75:
+        return 3.5
+    elif 3.75<rec<=4.25:
+        return 4
+    elif 4.25<rec<=4.75:
+        return 4.5
+    else:
+        return 5
+    
+for i in range(y_pred.size):
+    y_pred[i]=round_d2(y_pred[i])
+
+# Сравниваем предсказанные значения (y_pred) с реальными (y_test), и смотрим насколько они в среднем отличаются
+# Метрика называется Mean Absolute Error (MAE) и показывает среднее отклонение предсказанных значений от фактических.
+print('MAE:', metrics.mean_absolute_error(y_test, y_pred))
+
+print("calc time is ", datetime.now() - start_time)
+
+test_data = test_data.drop(['Rating'], axis=1)
+
+predict_submission = regr.predict(test_data)
+
+sample_submission['Rating'] = predict_submission
+sample_submission['Rating'] = sample_submission['Rating'].apply(round_d2)
+sample_submission.to_csv('submission.csv', index=False)
+sample_submission.head(10)
+
