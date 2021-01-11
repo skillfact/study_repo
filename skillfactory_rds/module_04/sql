@@ -1,1 +1,34 @@
-sql query
+sql query for dataset:
+
+
+with a as (
+select 
+t.flight_id, t.fare_conditions, count(0) qnt, sum(t.amount) amount
+from 
+dst_project.ticket_flights t
+group by t.flight_id, t.fare_conditions
+)
+select  f.flight_id,
+        f.aircraft_code,
+        (select a.model from dst_project.aircrafts a where a.aircraft_code = f.aircraft_code) aircraft_model,
+        f.departure_airport,
+        f.arrival_airport,
+        f.actual_departure,
+        f.actual_arrival,
+        (select a.city from dst_project.airports a where a.airport_code = f.departure_airport) departure_city,
+        (select a.city from dst_project.airports a where a.airport_code = f.arrival_airport) arrival_city,
+        (select a.latitude from dst_project.airports a where a.airport_code = f.departure_airport) departure_latitude,
+        (select a.latitude from dst_project.airports a where a.airport_code = f.arrival_airport) arrival_latitude,
+        (select a.longitude from dst_project.airports a where a.airport_code = f.departure_airport) departure_longitude,
+        (select a.longitude from dst_project.airports a where a.airport_code = f.arrival_airport) arrival_longitude,
+        (select count(0) from dst_project.seats s where s.aircraft_code = f.aircraft_code and s.fare_conditions = 'Business') bis_seats,
+        (select count(0) from dst_project.seats s where s.aircraft_code = f.aircraft_code and s.fare_conditions = 'Economy') eco_seats,
+        (select qnt from a where a.flight_id = f.flight_id and a.fare_conditions = 'Business') bis_ticket_qnt,
+        (select qnt from a where a.flight_id = f.flight_id and a.fare_conditions = 'Economy') eco_ticket_qnt,
+        (select amount from a where a.flight_id = f.flight_id and a.fare_conditions = 'Business') bis_ticket_amount,
+        (select amount from a where a.flight_id = f.flight_id and a.fare_conditions = 'Economy') eco_ticket_qnt
+FROM  dst_project.flights f
+where f.departure_airport = 'AAQ' 
+and (date_trunc('month', f.scheduled_departure) in ('2017-01-01','2017-02-01', '2017-12-01'))
+and f.status not in ('Cancelled')
+order by 1
